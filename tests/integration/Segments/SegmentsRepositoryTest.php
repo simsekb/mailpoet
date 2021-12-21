@@ -137,6 +137,16 @@ class SegmentsRepositoryTest extends \MailPoetTest {
     $this->segmentsRepository->createOrUpdate('Existing Segment');
   }
 
+  public function testItCanFindSimilarNames() {
+    $this->createDefaultSegment('test 1');
+    $this->createDefaultSegment('test 2');
+    $this->createDefaultSegment('best 3');
+    $this->segmentsRepository->flush();
+    $result = $this->segmentsRepository->getSegmentNamesLike('test%');
+    expect(count($result))->equals(2);
+    expect($result)->equals(['test 1', 'test 2']);
+  }
+
   private function createDefaultSegment(string $name): SegmentEntity {
     $segment = new SegmentEntity($name, SegmentEntity::TYPE_DEFAULT, 'description');
     $this->entityManager->persist($segment);

@@ -43,6 +43,25 @@ class SegmentSaveController {
   public function duplicate(SegmentEntity $segmentEntity): SegmentEntity {
     $duplicate = clone $segmentEntity;
     $duplicate->setName(sprintf(__('Copy of %s', 'mailpoet'), $segmentEntity->getName()));
+    $duplicateName = $duplicate->getName();
+
+    if (!$this->segmentsRepository->isNameUnique($duplicate->getName(), null)) {
+      $similarNamesWithNumbers = $this->segmentsRepository->getSegmentNamesLike($duplicateName . ' (%)');
+      if (empty($similarNamesWithNumbers)) {
+        $duplicate->setName($duplicateName . ' (1)');
+      } else {
+        $copyNumbers = array_map(function($name) use ($duplicateName) {
+          $regex = "/$duplicateName \(([0-9]+)\)/";
+          $matches = [];
+          preg_match($regex, $name, $matches);
+          return $matches[1];
+        }, $similarNamesWithNumbers);
+        $duplicate->setName(strtr(':original (:copyNumber)', [
+          ':original' => $duplicateName,
+          ':copyNumber' => max($copyNumbers) + 1,
+        ]));
+      }
+    }
 
     $this->segmentsRepository->verifyNameIsUnique($duplicate->getName(), $duplicate->getId());
 

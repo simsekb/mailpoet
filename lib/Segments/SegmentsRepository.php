@@ -254,4 +254,15 @@ class SegmentsRepository extends Repository {
       ->fetchOne();
     return (int)$result;
   }
+
+  public function getSegmentNamesLike(string $like): array {
+    $result = $this->entityManager->createQueryBuilder()
+      ->select('s.name')
+      ->from(SegmentEntity::class, 's')
+      ->where('s.name LIKE :like')
+      ->setParameter('like', $like)
+      ->getQuery()
+      ->getResult();
+    return array_map(fn($record) => $record['name'], $result);
+  }
 }
