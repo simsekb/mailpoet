@@ -113,6 +113,7 @@ class SettingsController {
     }
     $setting[$lastKey] = $value;
     $this->settingsRepository->createOrUpdateByName($mainKey, $this->settings[$mainKey]);
+    $this->resetCache();
   }
 
   public function delete($key) {
