@@ -112,11 +112,7 @@ wp plugin activate woocommerce-subscriptions
 wp plugin activate woocommerce-memberships
 
 # activate theme
-wp theme activate twentytwentyone
-
-if [[ $CIRCLE_JOB == *"_oldest"* ]]; then
-  wp theme activate twentynineteen
-fi
+wp theme install twentynineteen --activate
 
 # print info about installed plugins
 wp plugin get woocommerce
