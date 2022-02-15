@@ -9,6 +9,7 @@ use MailPoet\AdminPages\Pages\Help;
 use MailPoet\AdminPages\Pages\Logs;
 use MailPoet\AdminPages\Pages\MP2Migration;
 use MailPoet\AdminPages\Pages\NewsletterEditor;
+use MailPoet\AdminPages\Pages\NewsletterEditorV2;
 use MailPoet\AdminPages\Pages\Newsletters;
 use MailPoet\AdminPages\Pages\Premium;
 use MailPoet\AdminPages\Pages\Segments;
@@ -147,6 +148,19 @@ class Menu {
       [
         $this,
         'newletterEditor',
+      ]
+    );
+
+    // newsletter editor
+    $this->wp->addSubmenuPage(
+      true,
+      $this->setPageTitle(__('Newsletter', 'mailpoet')),
+      $this->wp->__('Newsletter Editor v2', 'mailpoet'),
+      AccessControl::PERMISSION_MANAGE_EMAILS,
+      'mailpoet-newsletter-editor-v2',
+      [
+        $this,
+        'newsletterEditorV2',
       ]
     );
 
@@ -447,6 +461,10 @@ class Menu {
 
   public function newletterEditor() {
     $this->container->get(NewsletterEditor::class)->render();
+  }
+
+  public function newsletterEditorV2() {
+    $this->container->get(NewsletterEditorV2::class)->render();
   }
 
   public function import() {

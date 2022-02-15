@@ -36,6 +36,7 @@
     ]
   },
   "dependencies": {
+    "@automattic/isolated-block-editor": "^2.10.0",
     "@babel/runtime": "^7.17.0",
     "@babel/runtime-corejs3": "^7.17.0",
     "@emotion/react": "^11.5.0",
@@ -130,7 +131,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@wordpress/browserslist-config": "^4.0.0",
     "@wordpress/dependency-extraction-webpack-plugin": "^3.2.1",
-    "@wordpress/scripts": "^19.0.0",
+    "@wordpress/scripts": "^21.0.2",
     "autoprefixer": "^10.4.2",
     "babel-loader": "^8.2.3",
     "babel-plugin-transform-commonjs": "^1.1.6",

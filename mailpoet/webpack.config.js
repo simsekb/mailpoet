@@ -523,6 +523,21 @@ const marketingOptinBlock = Object.assign({}, wpScriptConfig, {
   ],
 });
 
+const newsletterEditorV2Config = Object.assign({}, wpScriptConfig, {
+  name: 'newsletter_editor_v2',
+  entry: {
+    newsletter_editor_v2: path.resolve(
+      process.cwd(),
+      'assets/js/src/newsletter_editor_v2',
+      'newsletter_editor.tsx'
+    ),
+  },
+  output: {
+    filename: 'newsletter_editor_v2.js',
+    path: path.resolve(process.cwd(), 'assets/dist/js/'),
+  },
+});
+
 const configs = [
   publicConfig,
   adminConfig,
@@ -530,12 +545,13 @@ const configs = [
   formPreviewConfig,
   testConfig,
   postEditorBlock,
+  newsletterEditorV2Config,
   marketingOptinBlock,
 ];
 
 module.exports = configs.map((conf) => {
   const config = Object.assign({}, conf);
-  if (config.name === 'marketing_optin_block') {
+  if (config.name === 'marketing_optin_block' || config.name === 'newsletter_editor_v2') {
     return config;
   }
   if (config.name !== 'test') {
