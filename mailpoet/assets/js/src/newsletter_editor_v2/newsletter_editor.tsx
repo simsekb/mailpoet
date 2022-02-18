@@ -10,6 +10,10 @@ registerBlockType(dummyBlockName, dummyBlockSettings);
 
 const settings = {
   iso: {
+    blocks: {
+      allowBlocks: [dummyBlockName, 'core/paragraph', 'core/heading', 'core/list', 'core/image', 'core/spacer'],
+      disallowBlocks: [],
+    },
     toolbar: {
       inserter: true,
       inspector: true,
