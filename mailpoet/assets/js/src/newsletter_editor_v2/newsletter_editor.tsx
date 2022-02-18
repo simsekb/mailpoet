@@ -1,7 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { render } from '@wordpress/element';
 import { Panel, PanelBody, Button } from '@wordpress/components';
+import { registerBlockType } from '@wordpress/blocks';
 import IsolatedBlockEditor, { DocumentSection, ToolbarSlot } from '@automattic/isolated-block-editor';
+import { name as dummyBlockName, settings as dummyBlockSettings } from './dummy_block';
+
+// Add Custom Block Type
+registerBlockType(dummyBlockName, dummyBlockSettings);
 
 const settings = {
   iso: {
