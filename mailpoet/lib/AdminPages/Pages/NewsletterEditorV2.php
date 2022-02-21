@@ -28,11 +28,19 @@ class NewsletterEditorV2 {
     $isolatedEditor = new IsoGutenberg();
     $isolatedEditor->load();
 
+    $script_asset_path = Env::$assetsPath . '/dist/js/newsletter_editor_v2.asset.php';
+    $script_asset = file_exists($script_asset_path)
+      ? require $script_asset_path
+      : [
+        'dependencies' => [],
+        'version' => Env::$version,
+      ];
+
     $this->wp->wpEnqueueScript(
       'mailpoet_email_editor',
       Env::$assetsUrl . '/dist/js/newsletter_editor_v2.js',
-      [],
-      Env::$version,
+      $script_asset['dependencies'],
+      $script_asset['version'],
       true
     );
     $this->pageRenderer->displayPage('newsletter/editorv2.html', []);
