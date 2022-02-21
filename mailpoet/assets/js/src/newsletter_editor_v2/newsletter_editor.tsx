@@ -1,6 +1,13 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { render } from '@wordpress/element';
-import { Panel, PanelBody, Button } from '@wordpress/components';
+import {
+  Panel,
+  PanelBody,
+  Button,
+  TextControl,
+  SelectControl,
+  ColorPalette,
+} from '@wordpress/components';
 import { registerBlockType } from '@wordpress/blocks';
 import IsolatedBlockEditor, { DocumentSection, ToolbarSlot } from '@automattic/isolated-block-editor';
 import { name as dummyBlockName, settings as dummyBlockSettings } from './dummy_block';
@@ -52,10 +59,36 @@ render(
     <DocumentSection>
       <Panel>
         <PanelBody title="Sending Settings">
-          <li>Here comes sending settings</li>
+          <TextControl label="Sender name" />
+          <TextControl label="Sender address" />
+          <SelectControl
+            label="List of recipients"
+            options={[
+              { value: null, label: 'Select a list', disabled: true },
+              { value: 1, label: 'Regular customers' },
+              { value: 2, label: 'List B' },
+            ]}
+          />
         </PanelBody>
         <PanelBody title="Style Settings">
-          <li>Here comes style settings</li>
+          <ColorPalette
+            label="Body background"
+            colors={[
+              { name: 'black', color: '#000' },
+              { name: 'red', color: '#f00' },
+              { name: 'white', color: '#fff' },
+              { name: 'blue', color: '#00f' },
+            ]}
+          />
+          <ColorPalette
+            label="Content background"
+            colors={[
+              { name: 'black', color: '#000' },
+              { name: 'red', color: '#f00' },
+              { name: 'white', color: '#fff' },
+              { name: 'blue', color: '#00f' },
+            ]}
+          />
         </PanelBody>
       </Panel>
     </DocumentSection>
