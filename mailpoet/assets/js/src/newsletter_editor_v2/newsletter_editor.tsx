@@ -28,6 +28,13 @@ const settings = {
       toc: true,
       documentInspector: true,
     },
+    sidebar: {
+      inserter: true,
+      inspector: true,
+    },
+    defaultPreferences: {
+      fixedToolbar: true,
+    },
     moreMenu: {
       editor: true,
       fullscreen: true,
