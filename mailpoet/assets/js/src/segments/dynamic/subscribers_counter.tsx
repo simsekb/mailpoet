@@ -1,4 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import MailPoet from 'mailpoet';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { debounce } from 'lodash';
@@ -25,28 +30,12 @@ const SubscribersCounter: React.FunctionComponent = () => {
 
   const serializedSegment = JSON.stringify(segment);
   const latestRequestIdRef = useRef(1);
-  const deferredRequestRef = useRef(null);
-  const isRequestInFlight = useRef(false);
 
-  function load(loadItem: Segment): void {
-    // Don't allow multiple in-flight requests to avoid hammering the database
-    // when we'll only ever use the results of the last request
-    if (isRequestInFlight.current) {
-      deferredRequestRef.current = loadItem;
-      return;
-    }
-
-    deferredRequestRef.current = null;
+  const load = useCallback((loadItem: Segment, updateSubscriberCount): void => {
     latestRequestIdRef.current += 1;
     const requestId = latestRequestIdRef.current;
-    isRequestInFlight.current = true;
 
     loadCount(loadItem).then((response) => {
-      isRequestInFlight.current = false;
-      if (deferredRequestRef.current) {
-        load(deferredRequestRef.current);
-        return;
-      }
       if (requestId !== latestRequestIdRef.current) {
         // Don't do anything with the response because a newer request has been initiated
         return;
@@ -59,7 +48,6 @@ const SubscribersCounter: React.FunctionComponent = () => {
       }
       updateSubscriberCount(finished);
     }, (errorResponse) => {
-      isRequestInFlight.current = false;
       const finished = {} as SubscriberCount;
       const errors = errorResponse.errors.map((error) => error.message);
       finished.loading = false;
@@ -67,9 +55,9 @@ const SubscribersCounter: React.FunctionComponent = () => {
       finished.errors = errors;
       updateSubscriberCount(finished);
     });
-  }
+  }, []);
 
-  const debouncedLoadRef = useRef(debounce(load, 2000, { trailing: true }));
+  const debouncedLoad = useMemo(() => debounce(load, 2000, { trailing: true }), [load]);
 
   useEffect(() => {
     if (isFormValid(segment.filters)) {
@@ -78,15 +66,14 @@ const SubscribersCounter: React.FunctionComponent = () => {
         count: undefined,
         errors: undefined,
       });
-      const debouncedLoad = debouncedLoadRef.current;
-      debouncedLoad(segment);
+      debouncedLoad(segment, updateSubscriberCount);
     } else {
       updateSubscriberCount({
         count: undefined,
         loading: false,
       });
     }
-  }, [segment, serializedSegment, updateSubscriberCount]);
+  }, [segment, serializedSegment, updateSubscriberCount, debouncedLoad]);
 
   if (subscribersCount.errors) {
     return (
