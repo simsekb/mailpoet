@@ -60,5 +60,29 @@ class SwitchingLanguagesCest {
 	$i->click('Réglages');
 	$i->waitForElement('[data-automation-id="basic_settings_tab"]');
 	$i->see('Essentiels', '[data-automation-id="basic_settings_tab"]');
+
+	// Switch to Greek language
+	$i->cli(['site', 'switch-language', 'le']);
+	$i->amOnPage('/wp-admin/update-core.php');
+	$i->waitForText('Ενημερώσεις WordPress');
+	$i->click('Ενημέρωση μεταφράσεων');
+	$i->waitForText('Ενημέρωση μεταφράσεων');
+
+	// Verify Greek language in MailPoet
+	$i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
+	$i->waitForElement('[data-automation-id="create_standard"]');
+	$i->see('Στείλτε ένα ενημερωτικό δελτίο με εικόνες, κουμπιά, διαχωριστικά και κοινωνικούς σελιδοδείκτες. Ή απλά στείλτε ένα βασικό μήνυμα ηλεκτρονικού ταχυδρομείου.');
+	$i->click('Φόρμες');
+	$i->waitForElement('[data-automation-id="filters_όλα"]');
+	$i->see('Όλα', '[data-automation-id="filters_όλα"]');
+	$i->click('Συνδρομητές');
+	$i->waitForElement('[data-automation-id="listing-column-header-status"]');
+	$i->see('Κατάσταση', '[data-automation-id="listing-column-header-status"]');
+	$i->click('Λίστες');
+	$i->waitForElement('[data-automation-id="listing-column-header-average_subscriber_score"]');
+	$i->see('Βαθμολογία λίστας', '[data-automation-id="listing-column-header-average_subscriber_score"]');
+	$i->click('Ρυθμίσεις');
+	$i->waitForElement('[data-automation-id="signup_settings_tab"]');
+	$i->see('Επιβεβαίωση Εγγραφής', '[data-automation-id="signup_settings_tab"]');
   }
 }
