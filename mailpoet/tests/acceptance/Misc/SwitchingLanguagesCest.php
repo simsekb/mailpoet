@@ -62,7 +62,7 @@ class SwitchingLanguagesCest {
 	$i->see('Essentiels', '[data-automation-id="basic_settings_tab"]');
 
 	// Switch to Greek language
-	$i->cli(['site', 'switch-language', 'le']);
+	$i->cli(['site', 'switch-language', 'el']);
 	$i->amOnPage('/wp-admin/update-core.php');
 	$i->waitForText('Ενημερώσεις WordPress');
 	$i->click('Ενημέρωση μεταφράσεων');
