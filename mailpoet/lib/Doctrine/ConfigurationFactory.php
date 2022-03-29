@@ -5,8 +5,9 @@ namespace MailPoet\Doctrine;
 use MailPoet\Doctrine\Annotations\AnnotationReaderProvider;
 use MailPoetVendor\Doctrine\Common\Proxy\AbstractProxyFactory;
 use MailPoetVendor\Doctrine\ORM\Configuration;
+use MailPoetVendor\Doctrine\Persistence\Mapping\ClassMetadata;
 use MailPoetVendor\Doctrine\ORM\Mapping\Driver\AnnotationDriver;
-use MailPoetVendor\Doctrine\Persistence\Mapping\Driver\PHPDriver;
+use MailPoetVendor\Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use MailPoetVendor\Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 
 class ConfigurationFactory {
@@ -44,8 +45,7 @@ class ConfigurationFactory {
     if ($annotationReader) {
       $configuration->setMetadataDriverImpl(new AnnotationDriver($annotationReader, [self::ENTITY_DIR]));
     } else {
-      // Should never be called but Doctrine requires having driver set
-      $configuration->setMetadataDriverImpl(new PHPDriver([]));
+      $configuration->setMetadataDriverImpl(new NoCallWatcherMappingDriver());
     }
 
     // metadata cache (for production cache is pre-generated at build time)

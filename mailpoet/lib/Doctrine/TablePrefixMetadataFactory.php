@@ -36,8 +36,7 @@ class TablePrefixMetadataFactory extends ClassMetadataFactory {
 
     // prefix tables only after they are saved to cache so the prefix does not get included in cache
     // (getMetadataFor can call itself recursively but it saves to cache only after the recursive calls)
-    $cacheKey = $this->getCacheKey($classMetadata->getName());
-    $isCached = ($cache = $this->getCache()) ? $cache->hasItem($cacheKey) : false;
+    $isCached = $this->isCached($classMetadata->getName());
     if ($classMetadata instanceof ClassMetadata && $isCached) {
       $this->addPrefix($classMetadata);
       $this->prefixedMap[$classMetadata->getName()] = true;
@@ -61,5 +60,26 @@ class TablePrefixMetadataFactory extends ClassMetadataFactory {
         $classMetadata->associationMappings[$fieldName]['joinTable']['name'] = $this->prefix . $mappedTableName;
       }
     }
+  }
+
+  /**
+   * @inerhitDoc
+   */
+  public function isTransient($className) {
+    if (!$this->initialized) {
+      $this->initialize();
+    }
+    $driver = $this->getDriver();
+    if ($driver instanceof NoCallWatcherMappingDriver) {
+      // Everything in cache are metadata and class with metadata is non-transient
+      // See https://github.com/doctrine/persistence/blob/b07e347a24e7a19a2b6462e00a6dff899e4c2dd2/src/Persistence/Mapping/Driver/MappingDriver.php#L34
+      return !$this->isCached($className);
+    }
+    return parent::isTransient($className);
+  }
+
+  private function isCached(string $className): bool {
+    $cacheKey = $this->getCacheKey($className);
+    return ($cache = $this->getCache()) ? $cache->hasItem($cacheKey) : false;
   }
 }
