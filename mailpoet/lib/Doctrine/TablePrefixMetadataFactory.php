@@ -78,6 +78,25 @@ class TablePrefixMetadataFactory extends ClassMetadataFactory {
     return parent::isTransient($className);
   }
 
+  /**
+   * Copy pasted from MailPoetVendor\Doctrine\Persistence\Mapping\AbstractClassMetadataFactory
+   * Instead of detecting transient using Driver $this->getDriver()->isTransient($parentClass)
+   * with was causing reading annotations from file instead of using cache we use self::isTransient
+   * that utilizes cache for the isTransient logic.
+   * @inerhitDoc
+   */
+  protected function getParentClasses($name) {
+    // Collect parent classes, ignoring transient (not-mapped) classes.
+    $parentClasses = [];
+    foreach (array_reverse($this->getReflectionService()->getParentClasses($name)) as $parentClass) {
+      if ($this->isTransient($parentClass)) {
+        continue;
+      }
+      $parentClasses[] = $parentClass;
+    }
+    return $parentClasses;
+  }
+
   private function isCached(string $className): bool {
     $cacheKey = $this->getCacheKey($className);
     return ($cache = $this->getCache()) ? $cache->hasItem($cacheKey) : false;
