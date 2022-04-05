@@ -20,6 +20,14 @@ class SwitchingLanguagesCest {
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
 
+    // TEST CHECK: Change back to English and then to German again
+    $i->cli(['site', 'switch-language', 'en']);
+    $i->amOnPage('/wp-admin/update-core.php');
+    $i->waitForText('WordPress Updates');
+    $i->cli(['site', 'switch-language', 'de_DE']);
+    $i->reloadPage();
+    $i->waitForText('WordPress-Aktualisierungen');
+
     // Verify German language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
     $i->waitForElement('[data-automation-id="create_standard"]');
