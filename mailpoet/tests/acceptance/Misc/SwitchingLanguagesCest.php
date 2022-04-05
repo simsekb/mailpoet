@@ -10,6 +10,7 @@ class SwitchingLanguagesCest {
     $i->cli(['language', 'core', 'install', 'de_DE']);
     $i->cli(['language', 'core', 'install', 'fr_CA']);
     $i->cli(['language', 'core', 'install', 'el']);
+    $i->cli(['language', 'core', 'install', 'en_GB']);
 
     $i->login();
 
@@ -20,8 +21,8 @@ class SwitchingLanguagesCest {
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
 
-    // TEST CHECK: Change back to English and then to German again
-    $i->cli(['site', 'switch-language', 'en']);
+    // TEST CHECK: Change back to English GB and then to German again
+    $i->cli(['site', 'switch-language', 'en_GB']);
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('WordPress Updates');
     $i->cli(['site', 'switch-language', 'de_DE']);
