@@ -12,6 +12,16 @@ use MailPoetVendor\Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="scheduled_task_subscribers")
  */
 class ScheduledTaskSubscriberEntity {
+  const STATUS_UNPROCESSED = 0;
+  const STATUS_PROCESSED = 1;
+
+  const FAIL_STATUS_OK = 0;
+  const FAIL_STATUS_FAILED = 1;
+
+  const SENDING_STATUS_SENT = 'sent';
+  const SENDING_STATUS_FAILED = 'failed';
+  const SENDING_STATUS_UNPROCESSED = 'unprocessed';
+
   use CreatedAtTrait;
   use UpdatedAtTrait;
   use SafeToOneAssociationLoadTrait;
@@ -112,5 +122,11 @@ class ScheduledTaskSubscriberEntity {
 
   public function setSubscriber(SubscriberEntity $subscriber) {
     $this->subscriber = $subscriber;
+  }
+
+  public function resetToUnprocessed() {
+    $this->setError(null);
+    $this->setProcessed(0);
+    $this->setFailed(0);
   }
 }

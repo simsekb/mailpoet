@@ -1,6 +1,16 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Cannot cast string|void to string\\.$#"
+			count: 2
+			path: ../../lib/Automation/Engine/Storage/WorkflowRunStorage.php
+
+		-
+			message: "#^Cannot cast string|void to string\\.$#"
+			count: 3
+			path: ../../lib/Automation/Engine/Storage/WorkflowStorage.php
+
+		-
 			message: "#^Cannot access property \\$permissions on mixed\\.$#"
 			count: 1
 			path: ../../lib/API/JSON/API.php
@@ -631,16 +641,6 @@ parameters:
 			path: ../../lib/Form/Renderer.php
 
 		-
-			message: "#^Cannot call method count\\(\\) on mixed\\.$#"
-			count: 1
-			path: ../../lib/Listing/Handler.php
-
-		-
-			message: "#^Cannot call method offset\\(\\) on mixed\\.$#"
-			count: 1
-			path: ../../lib/Listing/Handler.php
-
-		-
 			message: "#^Cannot cast mixed to int\\.$#"
 			count: 1
 			path: ../../lib/Listing/ListingRepository.php
@@ -1231,12 +1231,12 @@ parameters:
 			path: ../../lib/Subscription/ManageSubscriptionFormRenderer.php
 
 		-
-			message: "#^Property MailPoet\\\\Subscription\\\\Pages\\:\\:\\$settings is never read, only written\\.$#"
+			message: "#^Cannot cast mixed to string\\.$#"
 			count: 1
-			path: ../../lib/Subscription/Pages.php
+			path: ../../lib/WooCommerce/Subscription.php
 
 		-
-			message: "#^Parameter mixed of print cannot be converted to string\\.$#"
+			message: "#^Cannot cast mixed to string\\.$#"
 			count: 1
 			path: ../../lib/Subscription/Registration.php
 
@@ -1324,11 +1324,6 @@ parameters:
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: ../../lib/WooCommerce/Helper.php
-
-		-
-			message: "#^Parameter \\#1 \\(mixed\\) of echo cannot be converted to string\\.$#"
-			count: 1
-			path: ../../lib/WooCommerce/Subscription.php
 
 		-
 			message: "#^PHPDoc type MailPoet\\\\Segments\\\\DynamicSegments\\\\SegmentSaveController of property MailPoet\\\\Test\\\\DataFactories\\\\DynamicSegment\\:\\:\\$saveController is not covariant with PHPDoc type MailPoet\\\\Segments\\\\SegmentSaveController of overridden property MailPoet\\\\Test\\\\DataFactories\\\\Segment\\:\\:\\$saveController\\.$#"

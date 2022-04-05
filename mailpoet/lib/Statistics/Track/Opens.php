@@ -84,6 +84,9 @@ class Opens {
     if (!$displayImage) return;
     // return 1x1 pixel transparent gif image
     header('Content-Type: image/gif');
+
+    // Output of base64_decode is predetermined and safe in this case
+    // phpcs:ignore WordPressDotOrg.sniffs.OutputEscaping.UnescapedOutputParameter, WordPress.Security.EscapeOutput.OutputNotEscaped
     echo base64_decode('R0lGODlhAQABAJAAAP8AAAAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==');
     exit;
   }

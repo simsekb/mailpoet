@@ -5,33 +5,37 @@ namespace MailPoet\Test\Subscription;
 use Codeception\Stub;
 use MailPoet\Config\Renderer;
 use MailPoet\DI\ContainerWrapper;
+use MailPoet\Entities\NewsletterEntity;
+use MailPoet\Entities\NewsletterOptionEntity;
+use MailPoet\Entities\NewsletterOptionFieldEntity;
+use MailPoet\Entities\ScheduledTaskEntity;
+use MailPoet\Entities\SegmentEntity;
+use MailPoet\Entities\SendingQueueEntity;
 use MailPoet\Entities\StatisticsUnsubscribeEntity;
 use MailPoet\Entities\SubscriberEntity;
+use MailPoet\Entities\SubscriberSegmentEntity;
 use MailPoet\Features\FeaturesController;
 use MailPoet\Form\AssetsController;
-use MailPoet\Models\Newsletter;
-use MailPoet\Models\NewsletterOption;
-use MailPoet\Models\NewsletterOptionField;
-use MailPoet\Models\ScheduledTask;
-use MailPoet\Models\Segment;
-use MailPoet\Models\SendingQueue;
-use MailPoet\Models\Subscriber;
-use MailPoet\Models\SubscriberSegment;
+use MailPoet\Newsletter\NewslettersRepository;
 use MailPoet\Newsletter\Scheduler\WelcomeScheduler;
+use MailPoet\Newsletter\Sending\ScheduledTasksRepository;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Settings\TrackingConfig;
 use MailPoet\Statistics\Track\SubscriberHandler;
 use MailPoet\Statistics\Track\Unsubscribes;
 use MailPoet\Subscribers\LinkTokens;
 use MailPoet\Subscribers\NewSubscriberNotificationMailer;
+use MailPoet\Subscribers\SubscriberSaveController;
+use MailPoet\Subscribers\SubscriberSegmentRepository;
 use MailPoet\Subscribers\SubscribersRepository;
 use MailPoet\Subscription\CaptchaRenderer;
 use MailPoet\Subscription\ManageSubscriptionFormRenderer;
 use MailPoet\Subscription\Pages;
 use MailPoet\Subscription\SubscriptionUrlFactory;
+use MailPoet\Test\DataFactories\Segment as SegmentFactory;
 use MailPoet\WP\Functions as WPFunctions;
 use MailPoetVendor\Carbon\Carbon;
-use MailPoetVendor\Idiorm\ORM;
+use MailPoetVendor\Doctrine\ORM\EntityManager;
 
 class PagesTest extends \MailPoetTest {
   private $testData = [];
@@ -50,10 +54,8 @@ class PagesTest extends \MailPoetTest {
     $this->subscribersRepository = $this->diContainer->get(SubscribersRepository::class);
     $this->wp = $this->diContainer->get(WPFunctions::class);
     $this->subscriber = new SubscriberEntity();
-    $this->subscriber->setFirstName('John');
-    $this->subscriber->setLastName('John');
-    $this->subscriber->setEmail('john.doe@example.com');
-    $this->subscriber->setStatus(Subscriber::STATUS_UNCONFIRMED);
+    $this->subscriber->setEmail('jane.doe@example.com');
+    $this->subscriber->setStatus(SubscriberEntity::STATUS_UNCONFIRMED);
     $this->subscribersRepository->persist($this->subscriber);
     $this->subscribersRepository->flush();
     $linkTokens = $this->diContainer->get(LinkTokens::class);
@@ -62,21 +64,45 @@ class PagesTest extends \MailPoetTest {
   }
 
   public function testItConfirmsSubscription() {
-    $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['send' => Stub\Expected::once()]);
+    $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['sendWithSubscriberAndSegmentEntities' => Stub\Expected::once()]);
     $pages = $this->getPages($newSubscriberNotificationSender);
     $subscription = $pages->init(false, $this->testData, false, false);
     $subscription->confirm();
-    $confirmedSubscriber = Subscriber::findOne($this->subscriber->getId());
-    expect($confirmedSubscriber->status)->equals(Subscriber::STATUS_SUBSCRIBED);
-    expect($confirmedSubscriber->lastSubscribedAt)->greaterOrEquals(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->subSecond());
-    expect($confirmedSubscriber->lastSubscribedAt)->lessOrEquals(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->addSecond());
+
+    $confirmedSubscriber = $this->subscribersRepository->findOneById($this->subscriber->getId());
+    $this->assertInstanceOf(SubscriberEntity::class, $confirmedSubscriber);
+    expect($confirmedSubscriber->getStatus())->equals(SubscriberEntity::STATUS_SUBSCRIBED);
+    $this->assertTrue(Carbon::parse($confirmedSubscriber->getLastSubscribedAt())->isToday());
+  }
+
+  public function testItUpdatesUnconfirmedDataWhenConfirmingSubscription() {
+    $firstName = 'Jane';
+    $lastName = 'Doe';
+    $this->subscriber->setUnconfirmedData(
+      (string)json_encode(['first_name' => $firstName, 'last_name' => $lastName, 'email' => 'jane.doe@example.com'])
+    );
+    $this->entityManager->persist($this->subscriber);
+    $this->entityManager->flush();
+
+    $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['sendWithSubscriberAndSegmentEntities' => Stub\Expected::once()]);
+    $pages = $this->getPages($newSubscriberNotificationSender);
+    $subscription = $pages->init(false, $this->testData, false, false);
+
+    $subscription->confirm();
+
+    $confirmedSubscriber = $this->subscribersRepository->findOneById($this->subscriber->getId());
+    $this->assertInstanceOf(SubscriberEntity::class, $confirmedSubscriber);
+    $this->assertSame(SubscriberEntity::STATUS_SUBSCRIBED, $confirmedSubscriber->getStatus());
+    $this->assertSame($firstName, $confirmedSubscriber->getFirstName());
+    $this->assertSame($lastName, $confirmedSubscriber->getLastName());
+    $this->assertNull($confirmedSubscriber->getUnconfirmedData());
   }
 
   public function testItUpdatesSubscriptionOnDuplicateAttemptButDoesntSendNotification() {
     $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['send' => Stub\Expected::never()]);
     $pages = $this->getPages($newSubscriberNotificationSender);
     $subscriber = $this->subscriber;
-    $subscriber->setStatus(Subscriber::STATUS_SUBSCRIBED);
+    $subscriber->setStatus(SubscriberEntity::STATUS_SUBSCRIBED);
     $subscriber->setFirstName('First name');
     $subscriber->setUnconfirmedData(null);
     $subscriber->setLastSubscribedAt(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->subDays(10));
@@ -87,7 +113,7 @@ class PagesTest extends \MailPoetTest {
     $this->entityManager->clear();
     $confirmedSubscriber = $this->subscribersRepository->findOneById($subscriber->getId());
     assert($confirmedSubscriber instanceof SubscriberEntity);
-    expect($confirmedSubscriber->getStatus())->equals(Subscriber::STATUS_SUBSCRIBED);
+    expect($confirmedSubscriber->getStatus())->equals(SubscriberEntity::STATUS_SUBSCRIBED);
     expect($confirmedSubscriber->getConfirmedAt())->greaterOrEquals(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->subSecond());
     expect($confirmedSubscriber->getConfirmedAt())->lessOrEquals(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->addSecond());
     expect($confirmedSubscriber->getLastSubscribedAt())->greaterOrEquals(Carbon::createFromTimestamp($this->wp->currentTime('timestamp'))->subSecond());
@@ -96,71 +122,68 @@ class PagesTest extends \MailPoetTest {
   }
 
   public function testItSendsWelcomeNotificationUponConfirmingSubscription() {
-    $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['send' => Stub\Expected::once()]);
+    $scheduledTasksRepository = $this->diContainer->get(ScheduledTasksRepository::class);
+    $newslettersRepository = $this->diContainer->get(NewslettersRepository::class);
+    $newSubscriberNotificationSender = $this->makeEmpty(NewSubscriberNotificationMailer::class, ['sendWithSubscriberAndSegmentEntities' => Stub\Expected::once()]);
     $pages = $this->getPages($newSubscriberNotificationSender);
     $subscription = $pages->init($action = false, $this->testData, false, false);
-    // create segment
-    $segment = Segment::create();
-    $segment->hydrate(['name' => 'List #1']);
-    $segment->save();
-    expect($segment->getErrors())->false();
-    // create subscriber->segment relation
-    $subscriberSegment = SubscriberSegment::create();
-    $subscriberSegment->hydrate(
-      [
-        'subscriber_id' => $this->subscriber->getId(),
-        'segment_id' => $segment->id,
-      ]
-    );
-    $subscriberSegment->save();
-    expect($subscriberSegment->getErrors())->false();
+
+    $segment = $this->createSegment();
+    $this->createSubscriberSegment($segment);
 
     // create welcome notification newsletter and relevant scheduling options
-    $newsletter = Newsletter::create();
-    $newsletter->type = Newsletter::TYPE_WELCOME;
-    $newsletter->status = Newsletter::STATUS_ACTIVE;
-    $newsletter->save();
-    expect($newsletter->getErrors())->false();
+    $newsletter = new NewsletterEntity();
+    $newsletter->setSubject('Some subject');
+    $newsletter->setType(NewsletterEntity::TYPE_WELCOME);
+    $newsletter->setStatus(NewsletterEntity::STATUS_ACTIVE);
+    $this->entityManager->persist($newsletter);
+
     $newsletterOptions = [
       'event' => 'segment',
-      'segment' => $segment->id,
+      'segment' => $segment->getId(),
       'afterTimeType' => 'days',
       'afterTimeNumber' => 1,
     ];
     foreach ($newsletterOptions as $option => $value) {
-      $newsletterOptionField = NewsletterOptionField::create();
-      $newsletterOptionField->name = $option;
-      $newsletterOptionField->newsletterType = $newsletter->type;
-      $newsletterOptionField->save();
-      expect($newsletterOptionField->getErrors())->false();
+      $newsletterOptionField = new NewsletterOptionFieldEntity();
+      $newsletterOptionField->setName($option);
+      $newsletterOptionField->setNewsletterType($newsletter->getType());
+      $this->entityManager->persist($newsletterOptionField);
 
-      $newsletterOption = NewsletterOption::create();
-      $newsletterOption->optionFieldId = (int)$newsletterOptionField->id;
-      $newsletterOption->newsletterId = $newsletter->id;
-      $newsletterOption->value = (string)$value;
-      $newsletterOption->save();
-      expect($newsletterOption->getErrors())->false();
+      $newsletterOption = new NewsletterOptionEntity($newsletter, $newsletterOptionField);
+      $newsletterOption->setValue((string)$value);
+      $newsletter->getOptions()->add($newsletterOption);
+      $this->entityManager->persist($newsletterOption);
     }
 
     // confirm subscription and ensure that welcome email is scheduled
     $subscription->confirm();
-    $scheduledNotifications = SendingQueue::findTaskByNewsletterId($newsletter->id)
-      ->where('tasks.status', SendingQueue::STATUS_SCHEDULED)
-      ->findMany();
+    $newsletterEntity = $newslettersRepository->findOneById($newsletter->getId());
+    $this->assertInstanceOf(NewsletterEntity::class, $newsletterEntity);
+    $scheduledNotifications = $scheduledTasksRepository->findByNewsletterAndStatus($newsletterEntity, SendingQueueEntity::STATUS_SCHEDULED);
     expect(count($scheduledNotifications))->equals(1);
+
     // Does not schedule another on repeated confirmation
     $subscription->confirm();
-    $scheduledNotifications = SendingQueue::findTaskByNewsletterId($newsletter->id)
-      ->where('tasks.status', SendingQueue::STATUS_SCHEDULED)
-      ->findMany();
+    $scheduledNotifications = $scheduledTasksRepository->findByNewsletterAndStatus($newsletterEntity, SendingQueueEntity::STATUS_SCHEDULED);
     expect(count($scheduledNotifications))->equals(1);
   }
 
   public function testItUnsubscribes() {
+    $segment = $this->createSegment();
+    $this->createSubscriberSegment($segment);
+
     $pages = $this->getPages()->init($action = 'unsubscribe', $this->testData);
     $pages->unsubscribe();
-    $updatedSubscriber = Subscriber::findOne($this->subscriber->getId());
-    expect($updatedSubscriber->status)->equals(Subscriber::STATUS_UNSUBSCRIBED);
+
+    $updatedSubscriber = $this->subscribersRepository->findOneById($this->subscriber->getId());
+    $this->assertInstanceOf(SubscriberEntity::class, $updatedSubscriber);
+    expect($updatedSubscriber->getStatus())->equals(SubscriberEntity::STATUS_UNSUBSCRIBED);
+
+    $subscriberSegments = $updatedSubscriber->getSubscriberSegments();
+    foreach ($subscriberSegments as $subscriberSegment) {
+      $this->assertSame(SubscriberEntity::STATUS_UNSUBSCRIBED, $subscriberSegment->getStatus());
+    }
   }
 
   public function testItTrackUnsubscribeWhenTrackingIsEnabled() {
@@ -183,19 +206,21 @@ class PagesTest extends \MailPoetTest {
     $this->testData['preview'] = 1;
     $pages = $this->getPages()->init($action = 'unsubscribe', $this->testData);
     $pages->unsubscribe();
-    $updatedSubscriber = Subscriber::findOne($this->subscriber->getId());
-    expect($updatedSubscriber->status)->notEquals(Subscriber::STATUS_UNSUBSCRIBED);
+
+    $updatedSubscriber = $this->subscribersRepository->findOneById($this->subscriber->getId());
+    $this->assertInstanceOf(SubscriberEntity::class, $updatedSubscriber);
+    expect($updatedSubscriber->getStatus())->notEquals(SubscriberEntity::STATUS_UNSUBSCRIBED);
   }
 
   public function _after() {
-    ORM::raw_execute('TRUNCATE ' . Subscriber::$_table);
-    ORM::raw_execute('TRUNCATE ' . ScheduledTask::$_table);
-    ORM::raw_execute('TRUNCATE ' . SendingQueue::$_table);
-    ORM::raw_execute('TRUNCATE ' . Newsletter::$_table);
-    ORM::raw_execute('TRUNCATE ' . Segment::$_table);
-    ORM::raw_execute('TRUNCATE ' . SubscriberSegment::$_table);
-    ORM::raw_execute('TRUNCATE ' . NewsletterOption::$_table);
-    ORM::raw_execute('TRUNCATE ' . NewsletterOptionField::$_table);
+    $this->truncateEntity(SubscriberEntity::class);
+    $this->truncateEntity(ScheduledTaskEntity::class);
+    $this->truncateEntity(SendingQueueEntity::class);
+    $this->truncateEntity(NewsletterEntity::class);
+    $this->truncateEntity(SegmentEntity::class);
+    $this->truncateEntity(SubscriberSegmentEntity::class);
+    $this->truncateEntity(NewsletterOptionEntity::class);
+    $this->truncateEntity(NewsletterOptionFieldEntity::class);
     $this->truncateEntity(StatisticsUnsubscribeEntity::class);
   }
 
@@ -207,7 +232,6 @@ class PagesTest extends \MailPoetTest {
     return new Pages(
       $newSubscriberNotificationsMock ?? $container->get(NewSubscriberNotificationMailer::class),
       $container->get(WPFunctions::class),
-      $container->get(SettingsController::class),
       $container->get(CaptchaRenderer::class),
       $container->get(WelcomeScheduler::class),
       $container->get(LinkTokens::class),
@@ -219,7 +243,25 @@ class PagesTest extends \MailPoetTest {
       $container->get(SubscriberHandler::class),
       $this->subscribersRepository,
       $container->get(TrackingConfig::class),
-      $container->get(FeaturesController::class)
+      $container->get(FeaturesController::class),
+      $container->get(EntityManager::class),
+      $container->get(SubscriberSaveController::class),
+      $container->get(SubscriberSegmentRepository::class)
     );
+  }
+
+  private function createSegment(): SegmentEntity {
+    $segmentFactory = new SegmentFactory();
+    $segment = $segmentFactory->withName('List #1')->create();
+
+    return $segment;
+  }
+
+  private function createSubscriberSegment(SegmentEntity $segment) {
+    $subscriberSegment = new SubscriberSegmentEntity($segment, $this->subscriber, 'subscribed');
+    $this->entityManager->persist($subscriberSegment);
+    $this->subscriber->getSubscriberSegments()->add($subscriberSegment);
+    $this->entityManager->persist($this->subscriber);
+    $this->entityManager->flush();
   }
 }

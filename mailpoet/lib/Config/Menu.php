@@ -85,25 +85,29 @@ class Menu {
       $this->wp->doAction('mailpoet_conflict_resolver_styles');
       $this->wp->doAction('mailpoet_conflict_resolver_scripts');
 
-      if ($_REQUEST['page'] === 'mailpoet-newsletter-editor') {
+      if (
+        isset($_REQUEST['page'])
+        && sanitize_text_field(wp_unslash($_REQUEST['page'])) === 'mailpoet-newsletter-editor'
+      ) {
         // Disable WP emojis to not interfere with the newsletter editor emoji handling
         $this->disableWPEmojis();
         $this->wp->addAction('admin_head', function() {
-          $fonts = 'Arvo:400,400i,700,700i'
-           . '|Lato:400,400i,700,700i'
-           . '|Lora:400,400i,700,700i'
-           . '|Merriweather:400,400i,700,700i'
-           . '|Merriweather+Sans:400,400i,700,700i'
-           . '|Noticia+Text:400,400i,700,700i'
-           . '|Open+Sans:400,400i,700,700i'
-           . '|Playfair+Display:400,400i,700,700i'
-           . '|Roboto:400,400i,700,700i'
-           . '|Source+Sans+Pro:400,400i,700,700i'
-           . '|Oswald:400,400i,700,700i'
-           . '|Raleway:400,400i,700,700i'
-           . '|Permanent+Marker:400,400i,700,700i'
-           . '|Pacifico:400,400i,700,700i';
-          echo '<link href="https://fonts.googleapis.com/css?family=' . $fonts . '" rel="stylesheet">';
+          echo '<link href="https://fonts.googleapis.com/css?family='
+            . 'Arvo:400,400i,700,700i'
+            . '|Lato:400,400i,700,700i'
+            . '|Lora:400,400i,700,700i'
+            . '|Merriweather:400,400i,700,700i'
+            . '|Merriweather+Sans:400,400i,700,700i'
+            . '|Noticia+Text:400,400i,700,700i'
+            . '|Open+Sans:400,400i,700,700i'
+            . '|Playfair+Display:400,400i,700,700i'
+            . '|Roboto:400,400i,700,700i'
+            . '|Source+Sans+Pro:400,400i,700,700i'
+            . '|Oswald:400,400i,700,700i'
+            . '|Raleway:400,400i,700,700i'
+            . '|Permanent+Marker:400,400i,700,700i'
+            . '|Pacifico:400,400i,700,700i'
+            . '" rel="stylesheet">';
         });
       }
     }
@@ -501,7 +505,7 @@ class Menu {
       if (empty($_REQUEST['page'])) {
         return false;
       }
-      $screenId = $_REQUEST['page'];
+      $screenId = sanitize_text_field(wp_unslash($_REQUEST['page']));
     }
     if (!empty($exclude)) {
       foreach ($exclude as $slug) {
@@ -518,13 +522,15 @@ class Menu {
    * to display admin notices only
    */
   public static function addErrorPage(AccessControl $accessControl) {
-    if (!self::isOnMailPoetAdminPage()) {
+    if (!self::isOnMailPoetAdminPage() || !isset($_REQUEST['page'])) {
       return false;
     }
+
+    $page = sanitize_text_field(wp_unslash($_REQUEST['page']));
     // Check if page already exists
     if (
-      get_plugin_page_hook($_REQUEST['page'], '')
-      || WPFunctions::get()->getPluginPageHook($_REQUEST['page'], self::MAIN_PAGE_SLUG)
+      get_plugin_page_hook($page, '')
+      || WPFunctions::get()->getPluginPageHook($page, self::MAIN_PAGE_SLUG)
     ) {
       return false;
     }
@@ -533,7 +539,7 @@ class Menu {
       'MailPoet',
       'MailPoet',
       AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN,
-      $_REQUEST['page'],
+      $page,
       [
         __CLASS__,
         'errorPageCallback',
@@ -547,7 +553,7 @@ class Menu {
 
   public function checkPremiumKey(ServicesChecker $checker = null) {
     $showNotices = isset($_SERVER['SCRIPT_NAME'])
-      && stripos($_SERVER['SCRIPT_NAME'], 'plugins.php') !== false;
+      && stripos(sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])), 'plugins.php') !== false;
     $checker = $checker ?: $this->servicesChecker;
     $this->premiumKeyValid = $checker->isPremiumKeyValid($showNotices);
   }

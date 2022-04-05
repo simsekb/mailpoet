@@ -3,7 +3,7 @@ Contributors: mailpoet
 Tags: email, email marketing, post notification, woocommerce emails, email automation, newsletter, newsletter builder, newsletter subscribers
 Requires at least: 5.3
 Tested up to: 5.9
-Stable tag: 3.85.0
+Stable tag: 3.85.1
 Requires PHP: 7.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -145,6 +145,20 @@ We welcome experienced translators to translate directly on [our Transifex proje
 
 Have a question for us? Reach us at security@ our domain, or report security issues to our [Bug Bounty program](https://hackerone.com/automattic).
 
+= Use of 3rd Party Services =
+
+To improve user experience, MailPoet may use the following 3rd party libraries if the _Load 3rd-party libraries_ setting is enabled:
+
+* Google Fonts - used in Form Editor which you can use to customize your forms, and in the Email Editor to style emails. This can be individually [disabled by a filter](https://kb.mailpoet.com/article/332-how-to-disable-google-fonts)
+
+* HelpScout - used to show help tooltips throughout the plugin, easily access documentation, and contact our customer support team. This functionality may load scripts from [https://beacon-v2.helpscout.net/](https://beacon-v2.helpscout.net/)
+
+* Mixpanel - used to send data about the usage of the MailPoet plugin when you [agree with sharing usage data with us](https://kb.mailpoet.com/article/130-sharing-your-data-with-us)
+
+* Satismeter - used to ask for feedback.
+
+Loading all these libraries is disabled by default. The option can be enabled in the _MailPoet's Settings > Advanced > Load 3rd-party libraries_.
+
 == Frequently Asked Questions ==
 
 = Does MailPoet store the data of the user's subscribers? =
@@ -203,6 +217,16 @@ Check our [Knowledge Base](https://kb.mailpoet.com) or contact us through our [s
 6. WooCommerce emails
 
 == Changelog ==
+
+= 3.85.1 - 2022-03-29 =
+* Updated: 1and1 hosting renamed to "IONOS by 1&1";
+* Updated: composer dependencies;
+* Updated: Gutenberg dependencies;
+* Improved: don't count "Pending payment" and "On-hold" orders to purchased segments;
+* Improved: when searching subscribers, update groups counts with found results;
+* Fixed: critical error at checkout with WooCommerce checkout block;
+* Fixed: error preventing sending when line height is set to 0 in email editor;
+* Fixed: shortcode default value not used in Emails opened from a Newsletter Archive page.
 
 = 3.85.0 - 2022-03-21 =
 * Improved: add "Send all site's emails with" to Help → System Status;

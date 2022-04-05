@@ -2,6 +2,7 @@
 
 namespace MailPoet\Test\Acceptance;
 
+use Facebook\WebDriver\Exception\TimeoutException;
 use MailPoet\Test\DataFactories\Newsletter;
 
 class ScheduleNewsletterCest {
@@ -41,7 +42,6 @@ class ScheduleNewsletterCest {
       ->create();
     $segmentName = $i->createListWithSubscriber();
     $currentDateTime = new \DateTime(strval($i->executeJS('return window.mailpoet_current_date_time')));
-    $dayNumber = $currentDateTime->format('d');
 
     // step 2 - Go to newsletter send page
     $i->login();
@@ -52,9 +52,18 @@ class ScheduleNewsletterCest {
     $i->click('[data-automation-id="email-schedule-checkbox"]');
 
     // step 3 - Pick today's date
+    $i->wantTo('Pick today‘s date');
     $i->waitForElement('form input[name=date]');
     $i->click('form input[name=date]');
-    $i->click(['class' => "react-datepicker__day--0{$dayNumber}"]);
+    // The calendar preselects tomorrow's date, making today's date not clickable on the last day of a month.
+    // In case it is not clickable try switching to previous month
+    try {
+      $i->waitForElementClickable(['class' => 'react-datepicker__day--today'], 1);
+    } catch (TimeoutException $e) {
+      $i->click(['class' => 'react-datepicker__navigation--previous']);
+      $i->waitForElementClickable(['class' => 'react-datepicker__day--today']);
+    }
+    $i->click(['class' => "react-datepicker__day--today"]);
 
     // `Schedule` caption - change time to 1 hour after now
     $i->selectOption('form select[name=time]', $currentDateTime->modify("+1 hour")->format('g:00 a'));

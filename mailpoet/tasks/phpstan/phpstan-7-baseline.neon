@@ -1,5 +1,6 @@
 parameters:
 	ignoreErrors:
+
 		-
 			message: "#^Cannot access property \\$permissions on mixed\\.$#"
 			count: 1
@@ -631,16 +632,6 @@ parameters:
 			path: ../../lib/Form/Renderer.php
 
 		-
-			message: "#^Cannot call method count\\(\\) on mixed\\.$#"
-			count: 1
-			path: ../../lib/Listing/Handler.php
-
-		-
-			message: "#^Cannot call method offset\\(\\) on mixed\\.$#"
-			count: 1
-			path: ../../lib/Listing/Handler.php
-
-		-
 			message: "#^Cannot cast mixed to int\\.$#"
 			count: 1
 			path: ../../lib/Listing/ListingRepository.php
@@ -1137,16 +1128,6 @@ parameters:
 
 		-
 			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 2
-			path: ../../lib/Subscribers/SubscriberListingRepository.php
-
-		-
-			message: "#^Cannot access offset 'status' on mixed\\.$#"
-			count: 1
-			path: ../../lib/Subscribers/SubscriberListingRepository.php
-
-		-
-			message: "#^Cannot access offset 'subscribersCount' on mixed\\.$#"
 			count: 1
 			path: ../../lib/Subscribers/SubscriberListingRepository.php
 
@@ -1163,11 +1144,6 @@ parameters:
 		-
 			message: "#^Cannot call method isStatic\\(\\) on mixed\\.$#"
 			count: 1
-			path: ../../lib/Subscribers/SubscriberListingRepository.php
-
-		-
-			message: "#^Cannot cast mixed to int\\.$#"
-			count: 3
 			path: ../../lib/Subscribers/SubscriberListingRepository.php
 
 		-
@@ -1226,12 +1202,12 @@ parameters:
 			path: ../../lib/Subscription/ManageSubscriptionFormRenderer.php
 
 		-
-			message: "#^Property MailPoet\\\\Subscription\\\\Pages\\:\\:\\$settings is never read, only written\\.$#"
+			message: "#^Cannot cast mixed to string\\.$#"
 			count: 1
-			path: ../../lib/Subscription/Pages.php
+			path: ../../lib/WooCommerce/Subscription.php
 
 		-
-			message: "#^Parameter mixed of print cannot be converted to string\\.$#"
+			message: "#^Cannot cast mixed to string\\.$#"
 			count: 1
 			path: ../../lib/Subscription/Registration.php
 
@@ -1314,11 +1290,6 @@ parameters:
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: ../../lib/WooCommerce/Helper.php
-
-		-
-			message: "#^Parameter \\#1 \\(mixed\\) of echo cannot be converted to string\\.$#"
-			count: 1
-			path: ../../lib/WooCommerce/Subscription.php
 
 		-
 			message: "#^PHPDoc type MailPoet\\\\Segments\\\\DynamicSegments\\\\SegmentSaveController of property MailPoet\\\\Test\\\\DataFactories\\\\DynamicSegment\\:\\:\\$saveController is not covariant with PHPDoc type MailPoet\\\\Segments\\\\SegmentSaveController of overridden property MailPoet\\\\Test\\\\DataFactories\\\\Segment\\:\\:\\$saveController\\.$#"
