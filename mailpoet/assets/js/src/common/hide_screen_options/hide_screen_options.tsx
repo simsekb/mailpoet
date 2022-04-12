@@ -1,17 +1,14 @@
 function HideScreenOptions() {
   return (
-    <>
-      {/* eslint-disable-next-line react/no-danger */}
-      <style dangerouslySetInnerHTML={
-      {
+    <style
+      /* eslint-disable-next-line react/no-danger */
+      dangerouslySetInnerHTML={{
         __html: `
-          #screen-meta { display: none !important; }
-          #screen-meta-links { display: none; }
-        `,
-      }
-    }
-      />
-    </>
+        #screen-meta { display: none !important; }
+        #screen-meta-links { display: none; }
+      `,
+      }}
+    />
   );
 }
 

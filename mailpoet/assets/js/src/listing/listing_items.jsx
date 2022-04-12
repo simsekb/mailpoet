@@ -6,18 +6,24 @@ import ListingBulkActions from 'listing/bulk_actions.jsx';
 import ListingItem from 'listing/listing_item.jsx';
 import { Grid } from 'common/grid';
 
-class ListingItems extends Component { // eslint-disable-line react/prefer-stateless-function, max-len
+// eslint-disable-next-line react/prefer-stateless-function, max-len
+class ListingItems extends Component {
   render() {
     if (this.props.items.length === 0) {
       let message;
       if (this.props.loading === true) {
-        message = (this.props.messages.onLoadingItems
-          && this.props.messages.onLoadingItems(this.props.group))
-          || MailPoet.I18n.t('loadingItems');
+        message =
+          (this.props.messages.onLoadingItems &&
+            this.props.messages.onLoadingItems(this.props.group)) ||
+          MailPoet.I18n.t('loadingItems');
       } else {
-        message = (this.props.messages.onNoItemsFound
-          && this.props.messages.onNoItemsFound(this.props.group, this.props.search))
-          || MailPoet.I18n.t('noItemsFound');
+        message =
+          (this.props.messages.onNoItemsFound &&
+            this.props.messages.onNoItemsFound(
+              this.props.group,
+              this.props.search,
+            )) ||
+          MailPoet.I18n.t('noItemsFound');
       }
 
       return (
@@ -25,8 +31,7 @@ class ListingItems extends Component { // eslint-disable-line react/prefer-state
           <tr className="mailpoet-listing-no-items">
             <td
               colSpan={
-                this.props.columns.length
-                + (this.props.is_selectable ? 1 : 0)
+                this.props.columns.length + (this.props.is_selectable ? 1 : 0)
               }
               className="colspanchange"
             >
@@ -37,35 +42,33 @@ class ListingItems extends Component { // eslint-disable-line react/prefer-state
       );
     }
 
-    const isSelectAllHidden = this.props.selection === false
-      || (this.props.count <= this.props.limit);
-    const areBulkActionsHidden = !(this.props.selected_ids.length > 0 || this.props.selection);
+    const isSelectAllHidden =
+      this.props.selection === false || this.props.count <= this.props.limit;
+    const areBulkActionsHidden = !(
+      this.props.selected_ids.length > 0 || this.props.selection
+    );
 
     const actionAndSelectAllRowClasses = classNames(
       'mailpoet-listing-actions-and-select-all-row',
       {
         mailpoet_hidden: areBulkActionsHidden && isSelectAllHidden,
-      }
+      },
     );
-    const selectAllClasses = classNames(
-      'mailpoet-listing-select-all',
-      {
-        mailpoet_hidden: isSelectAllHidden,
-      }
-    );
+    const selectAllClasses = classNames('mailpoet-listing-select-all', {
+      mailpoet_hidden: isSelectAllHidden,
+    });
 
     return (
       <tbody>
         <tr className={actionAndSelectAllRowClasses}>
           <td
             colSpan={
-              this.props.columns.length
-                  + (this.props.is_selectable ? 1 : 0)
+              this.props.columns.length + (this.props.is_selectable ? 1 : 0)
             }
           >
             <Grid.SpaceBetween verticalAlign="center">
               <div className="mailpoet-listing-bulk-actions-container">
-                { !areBulkActionsHidden && (
+                {!areBulkActionsHidden && (
                   <ListingBulkActions
                     count={this.props.count}
                     bulk_actions={this.props.bulk_actions}
@@ -73,18 +76,16 @@ class ListingItems extends Component { // eslint-disable-line react/prefer-state
                     selected_ids={this.props.selected_ids}
                     onBulkAction={this.props.onBulkAction}
                   />
-                ) }
+                )}
               </div>
               <div className={selectAllClasses}>
-                {
-                  (this.props.selection !== 'all')
-                    ? MailPoet.I18n.t('selectAllLabel')
-                    : MailPoet.I18n.t('selectedAllLabel').replace(
+                {this.props.selection !== 'all'
+                  ? MailPoet.I18n.t('selectAllLabel')
+                  : MailPoet.I18n.t('selectedAllLabel').replace(
                       '%d',
-                      this.props.count.toLocaleString()
-                    )
-                }
-                  &nbsp;
+                      this.props.count.toLocaleString(),
+                    )}
+                &nbsp;
                 <a
                   href="#"
                   onClick={(event) => {
@@ -92,11 +93,9 @@ class ListingItems extends Component { // eslint-disable-line react/prefer-state
                     this.props.onSelectAll(event);
                   }}
                 >
-                  {
-                    (this.props.selection !== 'all')
-                      ? MailPoet.I18n.t('selectAllLink')
-                      : MailPoet.I18n.t('clearSelection')
-                  }
+                  {this.props.selection !== 'all'
+                    ? MailPoet.I18n.t('selectAllLink')
+                    : MailPoet.I18n.t('clearSelection')}
                 </a>
                 .
               </div>
@@ -107,7 +106,8 @@ class ListingItems extends Component { // eslint-disable-line react/prefer-state
         {this.props.items.map((item) => {
           const renderItem = item;
           renderItem.id = parseInt(item.id, 10);
-          renderItem.selected = (this.props.selected_ids.indexOf(renderItem.id) !== -1);
+          renderItem.selected =
+            this.props.selected_ids.indexOf(renderItem.id) !== -1;
           let key = `item-${renderItem.id}-${item.id}`;
           if (typeof this.props.getListingItemKey === 'function') {
             key = this.props.getListingItemKey(item);

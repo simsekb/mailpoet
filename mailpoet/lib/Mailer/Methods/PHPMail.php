@@ -9,7 +9,7 @@ use MailPoet\Mailer\WordPress\PHPMailerLoader;
 
 PHPMailerLoader::load();
 
-class PHPMail {
+class PHPMail implements MailerMethod {
   public $sender;
   public $replyTo;
   public $returnPath;
@@ -29,15 +29,13 @@ class PHPMail {
   ) {
     $this->sender = $sender;
     $this->replyTo = $replyTo;
-    $this->returnPath = ($returnPath) ?
-      $returnPath :
-      $this->sender['from_email'];
+    $this->returnPath = $returnPath;
     $this->mailer = $this->buildMailer();
     $this->errorMapper = $errorMapper;
     $this->blacklist = new BlacklistCheck();
   }
 
-  public function send($newsletter, $subscriber, $extraParams = []) {
+  public function send($newsletter, $subscriber, $extraParams = []): array {
     if ($this->blacklist->isBlacklisted($subscriber)) {
       $error = $this->errorMapper->getBlacklistError($subscriber);
       return Mailer::formatMailerErrorResult($error);
@@ -80,7 +78,7 @@ class PHPMail {
     }
     $mailer->Sender = $this->returnPath; // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
     if (!empty($extraParams['unsubscribe_url'])) {
-      $this->mailer->addCustomHeader('List-Unsubscribe', $extraParams['unsubscribe_url']);
+      $this->mailer->addCustomHeader('List-Unsubscribe', '<' . $extraParams['unsubscribe_url'] . '>');
     }
 
     // Enforce base64 encoding when lines are too long, otherwise quoted-printable encoding

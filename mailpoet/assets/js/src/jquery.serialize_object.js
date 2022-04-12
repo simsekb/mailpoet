@@ -4,27 +4,29 @@ import jQuery from 'jquery';
 var $ = jQuery;
 // Combination of jQuery.deparam and jQuery.serializeObject by Ben Alman.
 /*!
-     * jQuery BBQ: Back Button & Query Library - v1.2.1 - 2/17/2010
-     * http://benalman.com/projects/jquery-bbq-plugin/
-     *
-     * Copyright (c) 2010 "Cowboy" Ben Alman
-     * Dual licensed under the MIT and GPL licenses.
-     * http://benalman.com/about/license/
-     */
+ * jQuery BBQ: Back Button & Query Library - v1.2.1 - 2/17/2010
+ * http://benalman.com/projects/jquery-bbq-plugin/
+ *
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
 /*!
-     * jQuery serializeObject - v0.2 - 1/20/2010
-     * http://benalman.com/projects/jquery-misc-plugins/
-     *
-     * Copyright (c) 2010 "Cowboy" Ben Alman
-     * Dual licensed under the MIT and GPL licenses.
-     * http://benalman.com/about/license/
-     */
-$.fn.mailpoetSerializeObject = function (coerce) { // eslint-disable-line func-names
+ * jQuery serializeObject - v0.2 - 1/20/2010
+ * http://benalman.com/projects/jquery-misc-plugins/
+ *
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
+// eslint-disable-next-line func-names
+$.fn.mailpoetSerializeObject = function (coerce) {
   var obj = {};
   var coerceTypes = { true: !0, false: !1, null: null };
 
   // Iterate over all name=value pairs.
-  $.each(this.serializeArray(), function (j, v) { // eslint-disable-line func-names
+  // eslint-disable-next-line func-names
+  $.each(this.serializeArray(), function (j, v) {
     var key = v.name;
     var val = v.value;
     var cur = obj;
@@ -53,11 +55,14 @@ $.fn.mailpoetSerializeObject = function (coerce) { // eslint-disable-line func-n
 
     // Coerce values.
     if (coerce) {
-      if (val && !Number.isNaN(val)) { // number
+      if (val && !Number.isNaN(val)) {
+        // number
         val = +val;
-      } else if (val === 'undefined') { // undefined
+      } else if (val === 'undefined') {
+        // undefined
         val = undefined;
-      } else if (coerceTypes[val] !== undefined) { // true, false, null
+      } else if (coerceTypes[val] !== undefined) {
+        // true, false, null
         val = coerceTypes[val];
       }
     }
@@ -74,9 +79,10 @@ $.fn.mailpoetSerializeObject = function (coerce) { // eslint-disable-line func-n
       // * Rinse & repeat.
       for (; i <= keysLast; i += 1) {
         key = keys[i] === '' ? cur.length : keys[i];
-        cur[key] = i < keysLast
-          ? cur[key] || (keys[i + 1] && isNaN(keys[i + 1]) ? {} : [])
-          : val;
+        cur[key] =
+          i < keysLast
+            ? cur[key] || (keys[i + 1] && isNaN(keys[i + 1]) ? {} : [])
+            : val;
         cur = cur[key];
       }
     } else if (Array.isArray(obj[key])) {

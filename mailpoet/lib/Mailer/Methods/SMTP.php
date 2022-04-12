@@ -12,7 +12,7 @@ use MailPoetVendor\Swift_Plugins_LoggerPlugin;
 use MailPoetVendor\Swift_Plugins_Loggers_ArrayLogger;
 use MailPoetVendor\Swift_SmtpTransport;
 
-class SMTP {
+class SMTP implements MailerMethod {
   public $host;
   public $port;
   public $authentication;
@@ -55,9 +55,7 @@ class SMTP {
     $this->encryption = $encryption;
     $this->sender = $sender;
     $this->replyTo = $replyTo;
-    $this->returnPath = ($returnPath) ?
-      $returnPath :
-      $this->sender['from_email'];
+    $this->returnPath = $returnPath;
     $this->mailer = $this->buildMailer();
     $this->mailerLogger = new Swift_Plugins_Loggers_ArrayLogger();
     $this->mailer->registerPlugin(new Swift_Plugins_LoggerPlugin($this->mailerLogger));
@@ -65,7 +63,7 @@ class SMTP {
     $this->blacklist = new BlacklistCheck();
   }
 
-  public function send($newsletter, $subscriber, $extraParams = []) {
+  public function send($newsletter, $subscriber, $extraParams = []): array {
     if ($this->blacklist->isBlacklisted($subscriber)) {
       $error = $this->errorMapper->getBlacklistError($subscriber);
       return Mailer::formatMailerErrorResult($error);

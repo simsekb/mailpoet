@@ -3,6 +3,7 @@
 namespace MailPoet\Cron\Workers\StatsNotifications;
 
 use MailPoet\Config\Renderer;
+use MailPoet\Config\ServicesChecker;
 use MailPoet\Cron\CronHelper;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Entities\SendingQueueEntity;
@@ -10,6 +11,7 @@ use MailPoet\Entities\StatisticsUnsubscribeEntity;
 use MailPoet\Entities\StatsNotificationEntity;
 use MailPoet\Entities\SubscriberEntity;
 use MailPoet\Mailer\Mailer;
+use MailPoet\Mailer\MailerFactory;
 use MailPoet\Mailer\MetaInfo;
 use MailPoet\Models\Newsletter;
 use MailPoet\Models\ScheduledTask;
@@ -77,8 +79,11 @@ class WorkerTest extends \MailPoetTest {
     $this->renderer = $this->createMock(Renderer::class);
     $this->settings = SettingsController::getInstance();
     $this->cronHelper = $this->diContainer->get(CronHelper::class);
+    $mailerFactory = $this->createMock(MailerFactory::class);
+    $mailerFactory->method('getDefaultMailer')
+      ->willReturn($this->mailer);
     $this->statsNotifications = new Worker(
-      $this->mailer,
+      $mailerFactory,
       $this->renderer,
       $this->settings,
       $this->cronHelper,
@@ -88,7 +93,8 @@ class WorkerTest extends \MailPoetTest {
       $this->diContainer->get(NewsletterStatisticsRepository::class),
       $this->entityManager,
       $this->diContainer->get(SubscribersFeature::class),
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(ServicesChecker::class)
     );
     $this->settings->set(Worker::SETTINGS_KEY, [
       'enabled' => true,

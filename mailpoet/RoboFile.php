@@ -20,6 +20,7 @@ class RoboFile extends \Robo\Tasks {
       ->stopOnFail()
       ->exec('./tools/vendor/composer.phar install')
       ->exec('npm ci --prefer-offline')
+      ->exec('cd .. && npm ci --prefer-offline')
       ->exec('cd ../eslint-config && npm ci --prefer-offline')
       ->run();
   }
@@ -109,6 +110,36 @@ class RoboFile extends \Robo\Tasks {
       ->taskExec(
         'php tasks/makepot/grunt-makepot.php wp-plugin . lang/mailpoet.pot mailpoet .mp_svn,assets,lang,node_modules,plugin_repository,tasks,tests,vendor'
       )->run();
+  }
+
+  public function translationsGetPotFileFromBuild() {
+    $potFilePathInsideZip = 'mailpoet/lang/mailpoet.pot';
+    $potFilePath = 'lang/mailpoet.pot';
+
+    if (!is_file(self::ZIP_BUILD_PATH)) {
+      $this->yell('mailpoet.zip file is missing. You must first download it using `./do release:download-zip`.', 40, 'red');
+      exit(1);
+    }
+
+    if (!file_exists(__DIR__ . '/lang')) {
+      $this->taskExec('mkdir -p ' . __DIR__ . '/lang')->run();
+    }
+
+    $zip = new ZipArchive();
+
+    if ($zip->open(self::ZIP_BUILD_PATH) === true) {
+      $potFileContent = $zip->getFromName($potFilePathInsideZip);
+      if ($potFileContent) {
+        file_put_contents($potFilePath, $potFileContent);
+        $this->say('mailpoet.pot extracted from the zip file to ' . $potFilePath);
+      } else {
+        $this->yell('Unable to find mailpoet.pot inside the zip file.', 40, 'red');
+        exit(1);
+      }
+    } else {
+      $this->yell('Unable to open the zip file.', 40, 'red');
+      exit(1);
+    }
   }
 
   public function translationsPush() {
@@ -330,6 +361,14 @@ class RoboFile extends \Robo\Tasks {
     $collection->addCode([$this, 'qaPhp']);
     $collection->addCode([$this, 'qaFrontendAssets']);
     return $collection->run();
+  }
+
+  public function qaPrettierCheck() {
+    return $this->taskExec('npx prettier --check .')->dir(dirname(__DIR__));
+  }
+
+  public function qaPrettierWrite() {
+    return $this->taskExec('npx prettier --write .')->dir(dirname(__DIR__));
   }
 
   public function qaPhp() {
@@ -820,7 +859,7 @@ class RoboFile extends \Robo\Tasks {
         return $this->releaseDownloadZip();
       })
       ->addCode(function () {
-        return $this->translationsBuild();
+        return $this->translationsGetPotFileFromBuild();
       })
       ->addCode(function () {
         return $this->translationsPush();
