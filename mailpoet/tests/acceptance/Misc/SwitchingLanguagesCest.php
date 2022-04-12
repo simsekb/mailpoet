@@ -19,7 +19,6 @@ class SwitchingLanguagesCest {
     $i->waitForText('WordPress-Aktualisierungen');
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
-    $i->wait(10);
 
     // Verify German language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
