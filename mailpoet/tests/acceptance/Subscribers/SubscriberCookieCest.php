@@ -18,7 +18,10 @@ class SubscriberCookieCest {
   public function setSubscriberCookieOnSignup(AcceptanceTester $i) {
     $i->wantTo('Set subscriber cookie on signup');
 
-    (new Settings())->withSubscribeOnRegisterEnabled();
+    (new Settings())
+      ->withSubscribeOnRegisterEnabled()
+      ->withTransactionEmailsViaMailPoet();
+
     $email = 'test-user@example.com';
 
     // signup
@@ -40,17 +43,25 @@ class SubscriberCookieCest {
       $i->waitForText('mutestuser is your new username');
 
       /**
-       * The tracking cookie will be set once the registrant has activated
+       * The tracking cookie will be set once the registrant has activated and logged into
        * the wp_user account
        **/
       $i->amOnMailboxAppPage();
       $i->waitForElement('.subject.unread', 10);
       $i->click(Locator::contains('span.subject.unread', 'Activate'));
-      $i->switchToIframe('#preview-html');
+      $i->waitForText('To activate your user');
       $i->click(Locator::contains('a', 'wp-activate.php'));
+      $i->switchToNextTab();
       $i->waitForText('Your account is now active');
-    }
+      $password = str_replace([' ', 'Password:'], '', strval($i->grabTextFrom("//div[@id='signup-welcome'] /p[2]")));
+      $i->click('Log in');
+      $i->wait(1);// this needs to be here, Username is not filled properly without this line
+      $i->fillField('Username', 'mutestuser');
+      $i->fillField('Password', $password);
+      $i->click('Log In');
+      $i->waitForText('Dashboard');
 
+    }
     // subscriber cookie should be set right after signup
     $this->checkSubscriberCookie($i, $email);
   }

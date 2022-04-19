@@ -37,4 +37,8 @@ class WaitAction implements Action {
 
     // TODO: call a step complete ($id) hook instead?
   }
+
+  public function isValid(array $subjects, Step $step, Workflow $workflow): bool {
+    return (int)($step->getArgs()['seconds'] ?? null) > 0;
+  }
 }
