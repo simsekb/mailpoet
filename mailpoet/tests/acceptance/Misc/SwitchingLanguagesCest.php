@@ -11,16 +11,18 @@ class SwitchingLanguagesCest {
     $i->cli(['language', 'core', 'install', 'fr_CA']);
     $i->cli(['language', 'core', 'install', 'el']);
 
-    $i->login();
-
     // Switch to German language
     $i->cli(['site', 'switch-language', 'de_DE']);
+
+    $i->login();
+
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('WordPress-Aktualisierungen');
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
-    $i->moveBack();
-    $i->moveForward();
+
+    $i->logOut();
+    $i->login();
 
     // Verify German language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
