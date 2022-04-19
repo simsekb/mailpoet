@@ -69,9 +69,9 @@ class AcceptanceTester extends \Codeception\Actor {
     }
 
     $i->wait(1);// this needs to be here, Username is not filled properly without this line
-    $i->fillField('#user_login', 'admin');
-    $i->fillField('#user_pass', 'password');
-    $i->click('#wp-submit');
+    $i->fillField('Username', 'admin');
+    $i->fillField('Password', 'password');
+    $i->click('Log In');
     $i->waitForText('MailPoet', 10);
     $i->saveSessionSnapshot('login');
   }
@@ -82,8 +82,8 @@ class AcceptanceTester extends \Codeception\Actor {
   public function logOut() {
     $i = $this;
     $i->amOnPage('/wp-login.php?action=logout');
-    $i->pressKey('#error-page','TAB');
-    $i->pressKey('#error-page','ENTER');
+    $i->click('log out');
+    $i->waitForText('You are now logged out.');
     $i->deleteSessionSnapshot('login');
   }
 
