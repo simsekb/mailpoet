@@ -19,6 +19,8 @@ class SwitchingLanguagesCest {
     $i->waitForText('WordPress-Aktualisierungen');
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
+    $i->click('Weiter zur WordPress-Aktualisierungs-Seite');
+    $i->waitForText('WordPress-Aktualisierungen');
 
     // Verify German language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
@@ -42,7 +44,9 @@ class SwitchingLanguagesCest {
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('Mises à jour de WordPress');
     $i->click('Mise à jour des traductions');
-    $i->waitForText('Mise à jour des traductions');
+    $i->waitForText('Aller à la page des mises à jour de WordPress');
+    $i->click('Aller à la page des mises à jour de WordPress');
+    $i->waitForText('Mises à jour de WordPress');
 
     // Verify French (Canada) language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
@@ -66,7 +70,9 @@ class SwitchingLanguagesCest {
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('Ενημερώσεις WordPress');
     $i->click('Ενημέρωση μεταφράσεων');
-    $i->waitForText('Ενημέρωση μεταφράσεων');
+    $i->waitForText('Επιστροφή στη σελίδα ενημερώσεων του WordPress');
+    $i->click('Επιστροφή στη σελίδα ενημερώσεων του WordPress');
+    $i->waitForText('Ενημερώσεις WordPress');
 
     // Verify Greek language in MailPoet
     $i->amOnPage('/wp-admin/admin.php?page=mailpoet-newsletters#/new');
