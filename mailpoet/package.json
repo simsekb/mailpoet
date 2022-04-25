@@ -102,6 +102,7 @@
     "setimmediate": "^1.0.5",
     "slugify": "^1.6.5",
     "spectrum-colorpicker": "^1.8.1",
+    "swr": "^2.0.0-beta.1",
     "tinymce": "^5.10.2",
     "underscore": "^1.13.2",
     "velocity-animate": "^1.5.2"
