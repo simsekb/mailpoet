@@ -17,6 +17,7 @@ class SwitchingLanguagesCest {
     $i->cli(['site', 'switch-language', 'de_DE']);
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('WordPress-Aktualisierungen');
+    $i->wait(60); // temporary
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
     $i->click('Weiter zur WordPress-Aktualisierungs-Seite');
@@ -70,8 +71,8 @@ class SwitchingLanguagesCest {
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('Ενημερώσεις WordPress');
     $i->click('Ενημέρωση μεταφράσεων');
-    $i->waitForText('Επιστροφή στη σελίδα ενημερώσεων του WordPress');
-    $i->click('Επιστροφή στη σελίδα ενημερώσεων του WordPress');
+    $i->waitForText('Μετάβαση στις Ενημερώσεις WordPress');
+    $i->click('Μετάβαση στις Ενημερώσεις WordPress');
     $i->waitForText('Ενημερώσεις WordPress');
 
     // Verify Greek language in MailPoet
