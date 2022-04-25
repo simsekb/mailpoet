@@ -2,22 +2,19 @@
 
 namespace MailPoet\Automation\Engine\API;
 
-use MailPoet\Automation\Engine\Exceptions;
+use MailPoet\Validator\Schema;
+
+use function current_user_can;
 
 abstract class Endpoint {
-  public function get(Request $request): Response {
-    throw Exceptions::apiMethodNotAllowed();
+  abstract public function handle(Request $request): Response;
+
+  public function checkPermissions(): bool {
+    return current_user_can('administrator');
   }
 
-  public function post(Request $request): Response {
-    throw Exceptions::apiMethodNotAllowed();
-  }
-
-  public function put(Request $request): Response {
-    throw Exceptions::apiMethodNotAllowed();
-  }
-
-  public function delete(Request $request): Response {
-    throw Exceptions::apiMethodNotAllowed();
+  /** @return array<string, Schema> */
+  public static function getRequestSchema(): array {
+    return [];
   }
 }
