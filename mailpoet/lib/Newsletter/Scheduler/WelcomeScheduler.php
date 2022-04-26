@@ -12,7 +12,6 @@ use MailPoet\Newsletter\Sending\ScheduledTasksRepository;
 use MailPoet\Segments\SegmentsRepository;
 use MailPoet\Subscribers\SubscribersRepository;
 use MailPoet\Tasks\Sending as SendingTask;
-use MailPoet\WP\Functions as WPFunctions;
 
 class WelcomeScheduler {
 
@@ -30,21 +29,21 @@ class WelcomeScheduler {
   /** @var ScheduledTasksRepository */
   private $scheduledTasksRepository;
 
-  /** @var WPFunctions|null */
-  private $wp;
+  /** @var Scheduler  */
+  private $scheduler;
 
   public function __construct(
     SubscribersRepository $subscribersRepository,
     SegmentsRepository $segmentsRepository,
     NewslettersRepository $newslettersRepository,
     ScheduledTasksRepository $scheduledTasksRepository,
-    ?WPFunctions $wp = null
+    Scheduler $scheduler
   ) {
     $this->subscribersRepository = $subscribersRepository;
     $this->segmentsRepository = $segmentsRepository;
     $this->newslettersRepository = $newslettersRepository;
     $this->scheduledTasksRepository = $scheduledTasksRepository;
-    $this->wp = $wp;
+    $this->scheduler = $scheduler;
   }
 
   public function scheduleSubscriberWelcomeNotification($subscriberId, $segments) {
@@ -121,10 +120,9 @@ class WelcomeScheduler {
     $sendingTask->setSubscribers([$subscriberId]);
     $sendingTask->status = SendingQueue::STATUS_SCHEDULED;
     $sendingTask->priority = SendingQueue::PRIORITY_HIGH;
-    $sendingTask->scheduledAt = Scheduler::getScheduledTimeWithDelay(
+    $sendingTask->scheduledAt = $this->scheduler->getScheduledTimeWithDelay(
       $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_AFTER_TIME_TYPE),
-      $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_AFTER_TIME_NUMBER),
-      $this->wp
+      $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_AFTER_TIME_NUMBER)
     );
     return $sendingTask->save();
   }
