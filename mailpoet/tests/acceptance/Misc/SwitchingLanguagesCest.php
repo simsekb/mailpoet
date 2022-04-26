@@ -17,7 +17,6 @@ class SwitchingLanguagesCest {
     $i->cli(['site', 'switch-language', 'de_DE']);
     $i->amOnPage('/wp-admin/update-core.php');
     $i->waitForText('WordPress-Aktualisierungen');
-    $i->wait(60); // temporary
     $i->click('Übersetzungen aktualisieren');
     $i->waitForText('Weiter zur WordPress-Aktualisierungs-Seite');
     $i->click('Weiter zur WordPress-Aktualisierungs-Seite');
