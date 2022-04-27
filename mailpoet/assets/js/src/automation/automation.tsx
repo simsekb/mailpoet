@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { CreateTestingWorkflowButton } from './testing';
 import { useMutation } from './api';
-import { useWorkflowsQuery } from './data';
+import { useCreateDatabaseMutation, useWorkflowsQuery } from './data';
 
 function ApiCheck(): JSX.Element {
   const { data, error, isValidating } = useWorkflowsQuery();
@@ -14,13 +14,19 @@ function ApiCheck(): JSX.Element {
 }
 
 function RecreateSchemaButton(): JSX.Element {
-  const [createSchema, { loading, error }] = useMutation('system/database', {
-    method: 'POST',
-  });
+  const {
+    trigger: createSchema,
+    error,
+    isMutating,
+  } = useCreateDatabaseMutation();
 
   return (
     <div>
-      <button type="button" onClick={() => createSchema()} disabled={loading}>
+      <button
+        type="button"
+        onClick={() => createSchema()}
+        disabled={isMutating}
+      >
         Recreate DB schema (data will be lost)
       </button>
       {error && (
