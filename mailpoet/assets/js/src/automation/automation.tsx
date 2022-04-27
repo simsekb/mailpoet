@@ -1,11 +1,12 @@
 import ReactDOM from 'react-dom';
 import { CreateTestingWorkflowButton } from './testing';
-import { useMutation, useQuery } from './api';
+import { useMutation } from './api';
+import { useWorkflowsQuery } from './data';
 
 function ApiCheck(): JSX.Element {
-  const { data, loading, error } = useQuery('workflows');
+  const { data, error, isValidating } = useWorkflowsQuery();
 
-  if (!data || loading) {
+  if (!data || isValidating) {
     return <div>Calling API...</div>;
   }
 
