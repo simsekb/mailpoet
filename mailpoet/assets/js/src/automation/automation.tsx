@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom';
+import { SWRConfig } from 'swr';
 import { CreateTestingWorkflowButton } from './testing';
 import {
   useCreateDatabaseMutation,
@@ -68,12 +69,18 @@ function DeleteSchemaButton(): JSX.Element {
 
 function App(): JSX.Element {
   return (
-    <div>
-      <ApiCheck />
-      <CreateTestingWorkflowButton />
-      <RecreateSchemaButton />
-      <DeleteSchemaButton />
-    </div>
+    <SWRConfig
+      value={{
+        focusThrottleInterval: 60000,
+      }}
+    >
+      <div>
+        <ApiCheck />
+        <CreateTestingWorkflowButton />
+        <RecreateSchemaButton />
+        <DeleteSchemaButton />
+      </div>
+    </SWRConfig>
   );
 }
 
