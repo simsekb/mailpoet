@@ -1,7 +1,10 @@
 import ReactDOM from 'react-dom';
 import { CreateTestingWorkflowButton } from './testing';
-import { useMutation } from './api';
-import { useCreateDatabaseMutation, useWorkflowsQuery } from './data';
+import {
+  useCreateDatabaseMutation,
+  useDeleteDatabaseMutation,
+  useWorkflowsQuery,
+} from './data';
 
 function ApiCheck(): JSX.Element {
   const { data, error, isValidating } = useWorkflowsQuery();
@@ -37,9 +40,11 @@ function RecreateSchemaButton(): JSX.Element {
 }
 
 function DeleteSchemaButton(): JSX.Element {
-  const [deleteSchema, { loading, error }] = useMutation('system/database', {
-    method: 'DELETE',
-  });
+  const {
+    trigger: deleteSchema,
+    error,
+    isMutating,
+  } = useDeleteDatabaseMutation();
 
   return (
     <div>
@@ -50,7 +55,7 @@ function DeleteSchemaButton(): JSX.Element {
           window.location.href =
             '/wp-admin/admin.php?page=mailpoet-experimental';
         }}
-        disabled={loading}
+        disabled={isMutating}
       >
         Delete DB schema & deactivate feature
       </button>
