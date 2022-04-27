@@ -7,7 +7,7 @@ parameters:
 
 		-
 			message: "#^Cannot cast string|void to string\\.$#"
-			count: 3
+			count: 4
 			path: ../../lib/Automation/Engine/Storage/WorkflowStorage.php
 
 		-
