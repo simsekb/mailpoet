@@ -1,5 +1,5 @@
-import { useMutation } from './api';
 import { id } from './id';
+import { useCreateWorkflowMutation } from './data';
 
 const createWaitStep = () => ({
   id: id(),
@@ -17,7 +17,7 @@ const createTrigger = (nextStepId: string) => ({
   next_step_id: nextStepId,
 });
 
-const createWorkflow = () => {
+const createWorkflowData = () => {
   const wait = createWaitStep();
   const trigger = createTrigger(wait.id);
   return {
@@ -30,20 +30,18 @@ const createWorkflow = () => {
 };
 
 export function CreateTestingWorkflowButton(): JSX.Element {
-  const [createSchema, { loading, error }] = useMutation('workflows', {
-    method: 'POST',
-  });
+  const {
+    trigger: createWorkflow,
+    error,
+    isMutating,
+  } = useCreateWorkflowMutation();
 
   return (
     <div>
       <button
         type="button"
-        onClick={() =>
-          createSchema({
-            body: JSON.stringify(createWorkflow()),
-          })
-        }
-        disabled={loading}
+        onClick={() => createWorkflow(createWorkflowData())}
+        disabled={isMutating}
       >
         Create testing workflow
       </button>
