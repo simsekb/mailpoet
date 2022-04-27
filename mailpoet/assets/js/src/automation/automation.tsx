@@ -7,14 +7,22 @@ import {
   useWorkflowsQuery,
 } from './data';
 
-function ApiCheck(): JSX.Element {
-  const { data, error, isValidating } = useWorkflowsQuery();
+function Workflows(): JSX.Element {
+  const { data, isLoading } = useWorkflowsQuery();
 
-  if (!data || isValidating) {
-    return <div>Calling API...</div>;
+  if (!data || isLoading) {
+    return <div>Loading workflows...</div>;
   }
 
-  return <div>{error ? 'API error!' : 'API OK ✓'}</div>;
+  return (
+    <div>
+      {data.data.map((workflow) => (
+        <div>
+          [{workflow.id}] {workflow.name} ({workflow.status})
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function RecreateSchemaButton(): JSX.Element {
@@ -75,10 +83,10 @@ function App(): JSX.Element {
       }}
     >
       <div>
-        <ApiCheck />
         <CreateTestingWorkflowButton />
         <RecreateSchemaButton />
         <DeleteSchemaButton />
+        <Workflows />
       </div>
     </SWRConfig>
   );
