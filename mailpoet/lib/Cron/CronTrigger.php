@@ -5,6 +5,7 @@ namespace MailPoet\Cron;
 use MailPoet\Cron\Triggers\MailPoet;
 use MailPoet\Cron\Triggers\WordPress;
 use MailPoet\Settings\SettingsController;
+use MailPoet\WP\Functions as WPFunctions;
 
 class CronTrigger {
   const METHOD_LINUX_CRON = 'Linux Cron';
@@ -30,17 +31,31 @@ class CronTrigger {
   /** @var SettingsController */
   private $settings;
 
+  /** @var WPFunctions */
+  private $wp;
+
+  /** @var CronHelper */
+  private $cronHelper;
+
   public function __construct(
     MailPoet $mailpoetTrigger,
     WordPress $wordpressTrigger,
-    SettingsController $settings
+    SettingsController $settings,
+    WPFunctions $wp,
+    CronHelper $cronHelper
   ) {
     $this->mailpoetTrigger = $mailpoetTrigger;
     $this->wordpressTrigger = $wordpressTrigger;
     $this->settings = $settings;
+    $this->wp = $wp;
+    $this->cronHelper = $cronHelper;
   }
 
   public function init() {
+    $this->wp->addAction('mailpoet_start_daemon_http_runner', [
+      $this,
+      'startDaemonHttpRunner',
+    ]);
     $currentMethod = $this->settings->get(self::SETTING_NAME . '.method');
     try {
       if ($currentMethod === self::METHOD_MAILPOET) {
@@ -52,5 +67,9 @@ class CronTrigger {
     } catch (\Exception $e) {
       // cron exceptions should not prevent the rest of the site from loading
     }
+  }
+
+  public function startDaemonHttpRunner(string $token) {
+    $this->cronHelper->accessDaemon($token);
   }
 }

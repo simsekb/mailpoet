@@ -2,6 +2,8 @@
 
 namespace MailPoet\Cron;
 
+use MailPoet\WP\Functions as WPFunctions;
+
 class Supervisor {
   public $daemon;
   public $token;
@@ -9,10 +11,15 @@ class Supervisor {
   /** @var CronHelper */
   private $cronHelper;
 
+  /** @var WPFunctions */
+  private $wp;
+
   public function __construct(
-    CronHelper $cronHelper
+    CronHelper $cronHelper,
+    WPFunctions $wp
   ) {
     $this->cronHelper = $cronHelper;
+    $this->wp = $wp;
   }
 
   public function init() {
@@ -35,8 +42,11 @@ class Supervisor {
   }
 
   public function runDaemon() {
-    $this->cronHelper->accessDaemon($this->token);
     $daemon = $this->cronHelper->getDaemon();
+    // Cleanup previous cron events in case some left hanging
+    $this->wp->wpUnscheduleHook('mailpoet_start_daemon_http_runner');
+    $secondAgo = $this->wp->currentTime('timestamp') - 1;
+    $this->wp->wpScheduleSingleEvent($secondAgo, 'mailpoet_start_daemon_http_runner', [$this->token]);
     return $daemon;
   }
 
