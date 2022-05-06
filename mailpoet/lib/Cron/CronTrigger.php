@@ -34,21 +34,21 @@ class CronTrigger {
   /** @var WPFunctions */
   private $wp;
 
-  /** @var CronHelper */
-  private $cronHelper;
+  /** @var DaemonWpCronRunner */
+  private $wpCronRunner;
 
   public function __construct(
     MailPoet $mailpoetTrigger,
     WordPress $wordpressTrigger,
     SettingsController $settings,
     WPFunctions $wp,
-    CronHelper $cronHelper
+    DaemonWpCronRunner $wpCronRunner
   ) {
     $this->mailpoetTrigger = $mailpoetTrigger;
     $this->wordpressTrigger = $wordpressTrigger;
     $this->settings = $settings;
     $this->wp = $wp;
-    $this->cronHelper = $cronHelper;
+    $this->wpCronRunner = $wpCronRunner;
   }
 
   public function init() {
@@ -70,6 +70,6 @@ class CronTrigger {
   }
 
   public function startDaemonHttpRunner(string $token) {
-    $this->cronHelper->accessDaemon($token);
+    $this->wpCronRunner->run($token);
   }
 }

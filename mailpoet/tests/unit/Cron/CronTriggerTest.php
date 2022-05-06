@@ -5,6 +5,7 @@ namespace MailPoet\Test\Cron;
 use Codeception\Stub;
 use MailPoet\Cron\CronHelper;
 use MailPoet\Cron\CronTrigger;
+use MailPoet\Cron\DaemonWpCronRunner;
 use MailPoet\Cron\Triggers\MailPoet;
 use MailPoet\Cron\Triggers\WordPress;
 use MailPoet\Settings\SettingsController;
@@ -59,12 +60,12 @@ class CronTriggerTest extends \MailPoetUnitTest {
     MailPoet $mailpoetTrigger = null,
     WordPress $wordpressTrigger = null,
     WPFunctions $wp = null,
-    CronHelper $cronHelper = null
+    DaemonWpCronRunner $wpCronRunner = null
   ) {
     $mailpoetTrigger = $mailpoetTrigger ?: $this->make(MailPoet::class, ['run' => true]);
     $wordpressTrigger = $wordpressTrigger ?: $this->make(WordPress::class, ['run' => true]);
     $wp = $wp ?: $this->make(WPFunctions::class, ['addAction' => true]);
-    $cronHelper = $cronHelper ?: $this->make(CronHelper::class, []);
-    return new CronTrigger($mailpoetTrigger, $wordpressTrigger, $settings, $wp, $cronHelper);
+    $wpCronRunner = $wpCronRunner ?: $this->make(DaemonWpCronRunner::class, []);
+    return new CronTrigger($mailpoetTrigger, $wordpressTrigger, $settings, $wp, $wpCronRunner);
   }
 }
