@@ -47,6 +47,9 @@ class DefaultsExtension extends Extension {
     global $wp_rewrite; // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
     $wp_rewrite->init(); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
     $wp_rewrite->flush_rules(); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+
+    // Remove cron lock before tests start
+    delete_transient('doing_cron');
   }
 
   private function setupWooCommerce() {
