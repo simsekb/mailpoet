@@ -6,6 +6,7 @@ require_once(ABSPATH . 'wp-admin/includes/user.php');
 
 use Codeception\Stub;
 use MailPoet\Entities\SubscriberEntity;
+use MailPoet\Features\FeaturesController;
 use MailPoet\Models\Segment;
 use MailPoet\Models\Subscriber;
 use MailPoet\Models\SubscriberSegment;
@@ -425,7 +426,8 @@ class WPTest extends \MailPoetTest {
       $wp,
       $this->diContainer->get(WelcomeScheduler::class),
       $this->diContainer->get(Helper::class),
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(FeaturesController::class)
     );
     $wpSegment->synchronizeUser($id);
     $subscriber = Subscriber::where("wp_user_id", $id)->findOne();
@@ -448,7 +450,8 @@ class WPTest extends \MailPoetTest {
       $wp,
       $this->diContainer->get(WelcomeScheduler::class),
       $this->diContainer->get(Helper::class),
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(FeaturesController::class)
     );
     $_POST[Subscription::CHECKOUT_OPTIN_PRESENCE_CHECK_INPUT_NAME] = 1;
     $wpSegment->synchronizeUser($id);
@@ -478,7 +481,8 @@ class WPTest extends \MailPoetTest {
       $wp,
       $this->diContainer->get(WelcomeScheduler::class),
       $this->diContainer->get(Helper::class),
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(FeaturesController::class)
     );
     $wpSegment->synchronizeUser($id);
     $wpSubscriber = Segment::getWPSegment()->subscribers()->where('wp_user_id', $id)->findOne();
@@ -511,7 +515,8 @@ class WPTest extends \MailPoetTest {
       $wp,
       $this->diContainer->get(WelcomeScheduler::class),
       $this->diContainer->get(Helper::class),
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(FeaturesController::class)
     );
     $wpSegment->synchronizeUser($id);
     $subscriber1 = Subscriber::where("wp_user_id", $id)->findOne();
@@ -546,7 +551,8 @@ class WPTest extends \MailPoetTest {
       $wp,
       $this->diContainer->get(WelcomeScheduler::class),
       $wooHelper,
-      $this->diContainer->get(SubscribersRepository::class)
+      $this->diContainer->get(SubscribersRepository::class),
+      $this->diContainer->get(FeaturesController::class)
     );
     $wpSegment->synchronizeUser($id);
     $subscriber1 = Subscriber::where("wp_user_id", $id)->findOne();
