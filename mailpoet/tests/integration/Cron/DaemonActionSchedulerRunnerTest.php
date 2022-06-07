@@ -84,18 +84,31 @@ class DaemonActionSchedulerRunnerTest extends \MailPoetTest {
       'name' => 'John',
       'address' => 'john@example.com',
     ]);
+    $this->actionSchedulerRunner->init();
     $actionScheduler = $this->diContainer->get(ActionScheduler::class);
+    // Unschedule trigger action so that it doesn't cause confusion in result counts
+    $actionScheduler->unscheduleAction(DaemonActionSchedulerRunner::DAEMON_TRIGGER_SCHEDULER_ACTION);
+
+    expect($this->actionSchedulerRunner->getDaemonExecutionLimit())->equals(20); // Verify initial execution limit
+
     $actionScheduler->scheduleRecurringAction(time() - 1, 100, DaemonActionSchedulerRunner::DAEMON_RUN_SCHEDULER_ACTION);
     $actions = $this->getMailPoetScheduledActions();
     expect($actions)->count(1);
     $doneActions = $this->getMailPoetCompleteActions();
     expect($doneActions)->count(0);
+
     // We can't call $this->actionSchedulerRunner->runActionScheduler directly because it ends up with wp_die();
     \ActionScheduler_QueueRunner::instance()->run();
+
     $doneActions = $this->getMailPoetCompleteActions();
     expect($doneActions)->count(1);
     $actions = $this->getMailPoetScheduledActions();
-    expect($actions)->count(1);
+    expect($actions)->count(0);
+    $cancelledActions = $this->getMailPoetCancelledActions();
+    expect($cancelledActions)->count(1); // There is no more work for the runner so it automatically cancels next run
+
+    // Verify execution limit after run. floor(30 - some time taken by previous action) - 10s (safety execution timout margin)
+    expect($this->actionSchedulerRunner->getDaemonExecutionLimit())->equals(19);
   }
 
   private function getMailPoetScheduledActions() {
@@ -110,6 +123,14 @@ class DaemonActionSchedulerRunnerTest extends \MailPoetTest {
     $actions = as_get_scheduled_actions([
       'group' => ActionScheduler::GROUP_ID,
       'status' => [\ActionScheduler_Store::STATUS_COMPLETE],
+    ]);
+    return $actions;
+  }
+
+  private function getMailPoetCancelledActions() {
+    $actions = as_get_scheduled_actions([
+      'group' => ActionScheduler::GROUP_ID,
+      'status' => [\ActionScheduler_Store::STATUS_CANCELED],
     ]);
     return $actions;
   }
